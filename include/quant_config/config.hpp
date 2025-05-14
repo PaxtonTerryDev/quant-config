@@ -1,7 +1,9 @@
 #ifndef QUANT_CONFIG_CONFIG_HPP
 #define QUANT_CONFIG_CONFIG_HPP
 
+#include "quant_config/json.hpp"
 #include <iostream>
+#include <fstream>
 
 namespace quant_config
 {
@@ -22,6 +24,23 @@ namespace quant_config
                       << "  Threads: " << thread_count_ << "\n"
                       << "  Logging: " << (logging_enabled_ ? "Enabled" : "Disabled") << "\n"
                       << "  Precision: " << precision_ << " digits" << std::endl;
+        }
+
+        static Config fromJsonFile(const std::string &filename)
+        {
+            std::ifstream input(filename);
+            if (!input.is_open())
+            {
+                throw std::runtime_error("Could not open config file: " + filename);
+            }
+
+            nlohmann::json j;
+            input >> j;
+
+            return Config(
+                j.value("threads", 1),
+                j.value("logging", false),
+                j.value("precision", 6));
         }
 
     private:
